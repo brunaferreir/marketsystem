@@ -12,5 +12,10 @@ def init_routes(app):
     def register_user():
         return UserController.register_user()
     
+    @app.route('/user', methods=['GET'])
+    def get_all_users():
+        return UserController.get_all_users()
+
+    
     
 
