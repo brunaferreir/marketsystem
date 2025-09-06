@@ -34,3 +34,15 @@ class UserService:
             db.session.commit()
             return user
         return None    
+    
+
+    # AQUI------------------------------------ MÉTODO PARA AUTENTICAR O USUÁRIO
+    @staticmethod
+    def authenticate_user(email, password):
+        user = db.session.query(User).filter_by(email=email).first()
+        if user and user.password == password:
+            return user
+        return None
+
+
+ 

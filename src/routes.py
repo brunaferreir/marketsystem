@@ -1,5 +1,6 @@
 from src.Application.Controllers.user_controller import UserController
 from flask import jsonify, make_response, request, redirect, url_for
+from flask_jwt_extended import JWTManager, create_access_token, get_jwt_identity, jwt_required
 
 def init_routes(app):    
     @app.route('/api', methods=['GET'])
@@ -35,5 +36,16 @@ def init_routes(app):
     @app.route('/perfil')
     @app.route('/perfil/<int:user_id>')
     def perfil(user_id=None):
-        return UserController.get_perfil(user_id)      
+        return UserController.get_perfil(user_id)  
+      
+#-AQUI2----------------------  ROTA DE LOGIN
+    @app.route('/login', methods=['POST'])
+    def login():
+        return UserController.login()
 
+    
+
+        
+
+    
+    

@@ -1,5 +1,7 @@
 from flask import request, jsonify, make_response
 from src.Application.Service.user_service import UserService
+#-------------------AQUI 2
+from flask_jwt_extended import create_access_token
 
 class UserController:
     @staticmethod
@@ -22,7 +24,7 @@ class UserController:
         }), 200)
 
 
-# AQUI--------------------------------- 
+# AQUI---------------------------------BUSCAR USUARIO POR ID  
     @staticmethod
     def get_user(user_id=None):
         try:
@@ -89,4 +91,27 @@ class UserController:
             print(f"Erro ao buscar perfil do usuário: {e}")
             return "Ocorreu um erro ao carregar o perfil.", 500    
 
- 
+
+
+    # AQUI 2---------------------------------  MÉTODO DE LOGIN
+    @staticmethod
+    def login():
+        try:
+            data = request.get_json()
+            email = data.get('email')
+            password = data.get('password')
+
+            if not email or not password:
+                return make_response(jsonify({"erro": "Email e senha são obrigatórios"}), 400)
+
+            user = UserService.authenticate_user(email, password)
+
+            if user:
+                access_token = create_access_token(identity=user.id)
+                return jsonify({"token": access_token}), 200
+            else:
+                return make_response(jsonify({"erro": "Credenciais inválidas"}), 401)
+        
+        except Exception as e:
+            print(f"Erro no login: {e}")
+            return make_response(jsonify({"erro": "Ocorreu um erro interno ao tentar fazer login."}), 500)
