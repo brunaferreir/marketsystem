@@ -1,4 +1,5 @@
 from src.Application.Controllers.user_controller import UserController
+from src.Application.Service.user_service import UserService  
 from flask import jsonify, make_response, request, redirect, url_for
 from flask_jwt_extended import JWTManager, create_access_token, get_jwt_identity, jwt_required
 
@@ -42,10 +43,37 @@ def init_routes(app):
     @app.route('/login', methods=['POST'])
     def login():
         return UserController.login()
-
     
 
-        
+#----------------------  POST CADASTRA SELLER (envia código WhatsApp)
+    @app.route('/api/sellers', methods=['POST'])
+    def cadastrar_seller():
+        data = request.json
+        result = UserService.create_seller(
+            data["nome"],
+            data["cnpj"],
+            data["email"],
+            data["celular"],
+            data["senha"]
+        )
+        return jsonify(result)
 
-    
-    
+#----------------------  POST ATIVA SELLER COM CÓDIGO
+    @app.route('/api/sellers/activate', methods=['POST'])
+    def ativar_seller():
+        data = request.json
+        result = UserService.activate_seller(
+            data["celular"],
+            data["codigo"]
+        )
+        return jsonify(result)
+
+#----------------------  POST LOGIN SELLER (só se ativo)
+    @app.route('/api/auth/login', methods=['POST'])
+    def login_seller():
+        data = request.json
+        result = UserService.login_user(
+            data["email"],
+            data["senha"]
+        )
+        return jsonify(result)

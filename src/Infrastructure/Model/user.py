@@ -1,4 +1,8 @@
 from src.config.data_base import db 
+from sqlalchemy.orm import relationship
+
+activation_codes = db.relationship("ActivationCode", back_populates="user")
+
 class User(db.Model):
     __tablename__ = 'users'
     id = db.Column(db.Integer, primary_key=True, autoincrement=True)
