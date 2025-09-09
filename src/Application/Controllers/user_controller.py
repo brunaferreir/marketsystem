@@ -1,6 +1,5 @@
 from flask import request, jsonify, make_response
 from src.Application.Service.user_service import UserService
-#-------------------AQUI 2
 from flask_jwt_extended import create_access_token
 
 class UserController:
@@ -23,22 +22,21 @@ class UserController:
             "usuarios": user.to_dict()
         }), 200)
 
-
-# AQUI---------------------------------BUSCAR USUARIO POR ID  
+#---------------------------------BUSCAR SELLER POR ID 
     @staticmethod
-    def get_user(user_id=None):
+    def get_seller_by_id(user_id=None):
         try:
             if user_id:
-                user = UserService.get_user(user_id)
-                if user:
-                    return make_response(jsonify(user.to_dict()), 200)
+                seller = UserService.get_seller_by_id(user_id)
+                if seller:
+                    return make_response(jsonify(seller.to_dict()), 200)
                 else:
                     return make_response(jsonify({
                         "error": "Usuario nao encontrado."
                     }), 404)
             else:
-                users = UserService.get_user()
-                user_list = [user.to_dict() for user in users]
+                users = UserService.get_seller_by_id()
+                user_list = [seller.to_dict() for seller in users]
                 return make_response(jsonify(user_list), 200)
 
         except Exception as e:
@@ -46,9 +44,60 @@ class UserController:
             return make_response(jsonify({
                 "error": "Ocorreu um erro interno no servidor."
             }), 500)
+        
+#---------------------- POST CADASTRAR SELLER
+    @staticmethod
+    def create_seller():
+        data = request.json
+        if not data:
+            return make_response(jsonify({"erro": "Dados inválidos"}), 400)
+        
+        result = UserService.create_seller(
+            data.get("nome"),
+            data.get("cnpj"),
+            data.get("email"),
+            data.get("celular"),
+            data.get("senha")
+        )
+        return jsonify(result), 200
+    
+#---------------------- POST ATIVA SELLER COM CÓDIGO
+    @staticmethod
+    def activate_seller():
+        data = request.json
+        if not data:
+            return make_response(jsonify({"erro": "Dados inválidos"}), 400)
+            
+        result = UserService.activate_seller(
+            data.get("celular"),
+            data.get("codigo")
+        )
+        return jsonify(result), 200    
 
+#--------------------------------- POST LOGIN SELLER
+    @staticmethod
+    def login_seller():
+        try:
+            data = request.get_json()
+            email = data.get('email')
+            password = data.get('password')
 
-    # AQUI---------------------------------  PUT ATUALIZA 1 USUARIO
+            if not email or not password:
+                return make_response(jsonify({"erro": "Email e senha são obrigatórios"}), 400)
+
+            seller = UserService.authenticate_user(email, password)
+
+            if seller:
+                access_token = create_access_token(identity=seller.id)
+                return jsonify({"token": access_token}), 200
+            else:
+                return make_response(jsonify({"erro": "Credenciais inválidas"}), 401)
+        
+        except Exception as e:
+            print(f"Erro no login: {e}")
+            return make_response(jsonify({"erro": "Ocorreu um erro interno ao tentar fazer login."}), 500)  
+
+#---------------------------------  PUT ATUALIZA 1 SELLER
     @staticmethod
     def update_user(user_id):
         try:
@@ -74,15 +123,14 @@ class UserController:
                 "erro": "Ocorreu um erro interno ao tentar atualizar o usuário."
             }), 500)
 
-
-#Método de controle para buscar um único usuário por ID para a página de perfil.
+#--------------------------------------ID para a página de perfil dp seller.
     @staticmethod
     def get_perfil(user_id=None):
         try:
             if user_id:
-                user = UserService.get_user(user_id)
-                if user:
-                    return f"<h1>Perfil do Usuário: {user.name}</h1><h1>CNPJ: {user.cnpj}</h1><h1>Email: {user.email}</h1> <h1>Celular: {user.celular}</h1> <h1>Senha: {user.password}</h1> <h1>Status: {user.status}</h1>"
+                seller = UserService.get_seller_by_id(user_id)
+                if seller:
+                    return f"<h1>Perfil do Usuário: {seller.name}</h1><h1>CNPJ: {seller.cnpj}</h1><h1>Email: {seller.email}</h1> <h1>Celular: {seller.celular}</h1> <h1>Senha: {seller.password}</h1> <h1>Status: {seller.status}</h1>"
                 else:
                     return "<h1>Usuário não encontrado</h1>"
             else:
@@ -90,28 +138,3 @@ class UserController:
         except Exception as e:
             print(f"Erro ao buscar perfil do usuário: {e}")
             return "Ocorreu um erro ao carregar o perfil.", 500    
-
-
-
-    # AQUI 2---------------------------------  MÉTODO DE LOGIN
-    @staticmethod
-    def login():
-        try:
-            data = request.get_json()
-            email = data.get('email')
-            password = data.get('password')
-
-            if not email or not password:
-                return make_response(jsonify({"erro": "Email e senha são obrigatórios"}), 400)
-
-            user = UserService.authenticate_user(email, password)
-
-            if user:
-                access_token = create_access_token(identity=user.id)
-                return jsonify({"token": access_token}), 200
-            else:
-                return make_response(jsonify({"erro": "Credenciais inválidas"}), 401)
-        
-        except Exception as e:
-            print(f"Erro no login: {e}")
-            return make_response(jsonify({"erro": "Ocorreu um erro interno ao tentar fazer login."}), 500)

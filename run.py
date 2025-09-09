@@ -17,7 +17,7 @@ def create_app():
 
     init_routes(app)
 
-    # cria qualquer tabela nova que ainda não existe (ActivationCode)
+ # cria qualquer tabela nova que ainda não existe (ActivationCode)
     with app.app_context():
         db.create_all()
 
