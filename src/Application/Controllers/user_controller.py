@@ -130,7 +130,7 @@ class UserController:
             if user_id:
                 seller = UserService.get_seller_by_id(user_id)
                 if seller:
-                    return f"<h1>Perfil do Usuário: {seller.name}</h1><h1>CNPJ: {seller.cnpj}</h1><h1>Email: {seller.email}</h1> <h1>Celular: {seller.celular}</h1> <h1>Senha: {seller.password}</h1> <h1>Status: {seller.status}</h1>"
+                    return f"<h1>Perfil do Usuário: {seller.name}</h1><h1>CNPJ: {seller.cnpj}</h1><h1>Email: {seller.email}</h1> <h1>Celular: {seller.celular}</h1> <id>Senha: {seller.password}</h1> <h1>Status: {seller.status}</h1>"
                 else:
                     return "<h1>Usuário não encontrado</h1>"
             else:
@@ -138,3 +138,32 @@ class UserController:
         except Exception as e:
             print(f"Erro ao buscar perfil do usuário: {e}")
             return "Ocorreu um erro ao carregar o perfil.", 500    
+        
+    @staticmethod
+    def delete_user(user_id):
+        try:
+            sucess = UserService.delete_user(user_id)
+            if sucess:
+                return make_response(jsonify({"mensagem": "Usuário deleteado com sucesso"}), 200)
+            else:
+                return make_response(jsonify({"erro": "Usuário não encontrado"}), 404)
+        except Exception as e:
+            print(f"Erro ao deletar usuário: {e}")
+            return make_response(jsonify({"erro": "Erro interno ao tentar deletar  o usuário"}), 500)
+        
+        
+    @staticmethod
+    def inactivate_user(user_id):
+        try:
+            user = UserService.inactivate_user(user_id)
+            if user:
+                return make_response(jsonify({
+                    "mensagem": "Uuário inativado com sucesso",
+                    "usuario": user.to_dict()
+                }), 200)
+            else:
+                return make_response(jsonify({"Erro": "Usuário não encontrado"}), 404)
+        except Exception as e:
+            print(f"Erro ao inativar usuário: {e}")
+            return make_response(jsonify({"Erro": "Erro interno  ao tentar inativar o usuário"}), 500)
+            
