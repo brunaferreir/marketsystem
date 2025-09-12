@@ -77,3 +77,9 @@ def init_routes(app):
             data["senha"]
         )
         return jsonify(result)
+    
+    #Rota DELETE
+    app.route("/Usuários/<int:user_id>", methods=["DELETE"])(UserController.delete_user)
+    
+    #Rota PATCH para inativar
+    app.route("usuário/<int:user_id>/inativar", methods=["PATCH"])(UserController.inactivate_user)
