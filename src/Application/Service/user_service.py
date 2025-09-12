@@ -107,3 +107,21 @@ class UserService:
         # Gera o token de acesso
         token = create_access_token(identity=user.id)
         return {"token": token, "message": "Login realizado com sucesso!"}
+    
+    @staticmethod
+    def delete_user(user_id):
+        user = db.session.get(User, user_id)
+        if user:
+            db.session.delete(user)
+            db.session.commit()
+            return True
+        return False
+    
+    @staticmethod
+    def inacttivate_user(user_id):
+        user = db.session.get(User, user_id)
+        if user:
+            user.status = "inactive"
+            db.session.commit()
+            return user
+        return None
