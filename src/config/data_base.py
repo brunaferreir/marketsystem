@@ -1,6 +1,9 @@
 from flask_sqlalchemy import SQLAlchemy
+from flask_bcrypt import Bcrypt
 
 db = SQLAlchemy()
+brycpt = Bcrypt()
+
 
 def init_db(app):
     """
@@ -9,3 +12,4 @@ def init_db(app):
     app.config['SQLALCHEMY_DATABASE_URI'] = 'mysql+mysqlconnector://root:123456@localhost:3306/market_management'
     app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
     db.init_app(app)
+    brycpt.init_app(app)

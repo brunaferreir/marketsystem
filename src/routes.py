@@ -9,6 +9,19 @@ def init_routes(app):
         return make_response(jsonify({
             "mensagem": "API - OK; Docker - Up",
         }), 200)
+        
+        
+#----------------------- ROTA PROTEGIDA (perfil autenticado)
+    @app.route('/api/auth/me', methods=['GET'])
+    @jwt_required()
+    def get_me():
+        user_id = get_jwt_identity()
+        user = UserService.get_seller_by_id(user_id)
+
+        if not user:
+            return jsonify({"error": "Usuário não encontrado"}), 404
+
+        return jsonify(user.to_dict()), 200 
     
 #----------------------  GET PARA 1 SELLER
     @app.route('/api/sellers/<int:user_id>', methods=['GET'])

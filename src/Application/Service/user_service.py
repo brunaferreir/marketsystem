@@ -1,7 +1,7 @@
 from flask_jwt_extended import create_access_token
 from src.Domain.user import UserDomain
 from src.Infrastructure.Model.user import User
-from src.config.data_base import db 
+from src.config.data_base import db, bcrypt
 import random
 from src.Infrastructure.http.whats_app import enviar_codigo_whatsapp
 from src.Infrastructure.Model.activation_code import ActivationCode
@@ -9,12 +9,13 @@ from src.Infrastructure.Model.activation_code import ActivationCode
 class UserService:
     @staticmethod
     def create_user(name, cnpj, email, celular, password):
+        hashed_password = bcrypt.generate_password_hash(password).decode("utf-8")
         new_user = UserDomain(
             name=name,
             cnpj=cnpj,
             email=email,
             celular=celular,
-            password=password, 
+            password=hashed_password, 
             status="inactive"
         )
         
@@ -31,18 +32,19 @@ class UserService:
         db.session.commit()
         return user
 
-
     @staticmethod
     def get_seller_by_id(user_id=None):
         if user_id:
             return db.session.get(User, user_id)
-        
+        return None
+
     @staticmethod
     def update_user(user_id, data):
         user = db.session.get(User, user_id)
         if user:
+            # Se houver nova senha, hash antes de salvar
             if 'password' in data:
-                data['password'] = data['password']
+                data['password'] = bcrypt.generate_password_hash(data['password']).decode("utf-8")
 
             for key, value in data.items():
                 setattr(user, key, value)
@@ -53,7 +55,7 @@ class UserService:
     @staticmethod
     def authenticate_user(email, password):
         user = db.session.query(User).filter_by(email=email).first()
-        if user and user.password == password:
+        if user and bcrypt.check_password_hash(user.password, password):
             return user
         return None
 
@@ -118,7 +120,7 @@ class UserService:
         return False
     
     @staticmethod
-    def inacttivate_user(user_id):
+    def inactivate_user(user_id):
         user = db.session.get(User, user_id)
         if user:
             user.status = "inactive"
