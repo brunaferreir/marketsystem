@@ -42,7 +42,7 @@ class UserService:
     def update_user(user_id, data):
         user = db.session.get(User, user_id)
         if user:
-            # Se houver nova senha, hash antes de salvar
+           
             if 'password' in data:
                 data['password'] = bcrypt.generate_password_hash(data['password']).decode("utf-8")
 
@@ -59,7 +59,7 @@ class UserService:
             return user
         return None
 
-    #---------------------- CADASTRAR VENDEDOR + ENVIAR CÓDIGO
+    
     @staticmethod
     def create_seller(name, cnpj, email, celular, password):
         try:
@@ -77,7 +77,7 @@ class UserService:
         except Exception as e:
             return {"error": f"Erro ao criar vendedor: {e}"}
 
-    #---------------------- ATIVAR VENDEDOR COM CÓDIGO
+   
     @staticmethod
     def activate_seller(celular, codigo):
         user = db.session.query(User).filter_by(celular=celular).first()
@@ -96,7 +96,7 @@ class UserService:
 
         return {"message": "Usuário ativado com sucesso!"}
         
-    #---------------------- LOGIN (só se ativo)
+  
     @staticmethod
     def login_seller(email, password):
         user = UserService.authenticate_user(email, password)
@@ -106,7 +106,7 @@ class UserService:
         if user.status != "active":
             return {"error": "Usuário inativo. Ative primeiro."}
 
-        # Gera o token de acesso
+       
         token = create_access_token(identity=user.id)
         return {"token": token, "message": "Login realizado com sucesso!"}
     
