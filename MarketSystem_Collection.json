@@ -1,0 +1,129 @@
+{
+  "info": {
+    "name": "API Sellers",
+    "_postman_id": "d1c9c71c-1c0a-4b7d-9df3-123456789abc",
+    "description": "Coleção de endpoints da API Sellers para testes no Postman",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "item": [
+    {
+      "name": "API Status",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": "{{base_url}}/api"
+      }
+    },
+    {
+      "name": "Login",
+      "request": {
+        "method": "POST",
+        "header": [
+          { "key": "Content-Type", "value": "application/json" }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"email\": \"teste@teste.com\",\n  \"password\": \"123456\"\n}"
+        },
+        "url": "{{base_url}}/api/auth/login"
+      }
+    },
+    {
+      "name": "Get Me",
+      "request": {
+        "method": "GET",
+        "header": [
+          { "key": "Authorization", "value": "Bearer {{token}}", "type": "text" }
+        ],
+        "url": "{{base_url}}/api/auth/me"
+      }
+    },
+    {
+      "name": "Criar Seller",
+      "request": {
+        "method": "POST",
+        "header": [
+          { "key": "Content-Type", "value": "application/json" }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"nome\": \"Novo Seller\",\n  \"cnpj\": \"123456789\",\n  \"email\": \"seller@teste.com\",\n \"celular\": \"5511970507045\",\n \"senha\": \"123456\"\n}"
+		 
+        },
+        "url": "{{base_url}}/api/sellers"
+      }
+    },
+    {
+      "name": "Ativar Seller",
+      "request": {
+        "method": "POST",
+        "header": [
+          { "key": "Content-Type", "value": "application/json" }
+        ],
+        "body": {
+          "mode": "raw",
+		  "raw": "{\n  \"celular\":  \"5511970507045\",\n \"codigo\": \"8665\"\n}"
+        },
+        "url": "{{base_url}}/api/sellers/activate"
+      }
+    },
+    {
+      "name": "Get Seller by ID",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": "{{base_url}}/api/sellers/1"
+      }
+    },
+    {
+      "name": "Update User",
+      "request": {
+        "method": "PUT",
+        "header": [
+          { "key": "Content-Type", "value": "application/json" }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"nome\": \"User Atualizado\"\n}"
+        },
+        "url": "{{base_url}}/user/1"
+      }
+    },
+    {
+      "name": "Delete Seller",
+      "request": {
+        "method": "DELETE",
+        "header": [],
+        "url": "{{base_url}}/api/sellers/1"
+      }
+    },
+    {
+      "name": "Inativar Usuário",
+      "request": {
+        "method": "PATCH",
+        "header": [
+          { "key": "Content-Type", "value": "application/json" }
+        ],
+        "url": "{{base_url}}/usuário/1/inativar"
+      }
+    },
+    {
+      "name": "Perfil",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": "{{base_url}}/perfil/1"
+      }
+    }
+  ],
+  "variable": [
+    {
+      "key": "base_url",
+      "value": "http://localhost:5000"
+    },
+    {
+      "key": "token",
+      "value": ""
+    }
+  ]
+}
