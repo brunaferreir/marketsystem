@@ -1,8 +1,8 @@
 {
   "info": {
-    "name": "API Sellers",
+    "name": "API Sellers + Produtos + Vendas",
     "_postman_id": "d1c9c71c-1c0a-4b7d-9df3-123456789abc",
-    "description": "Coleção de endpoints da API Sellers para testes no Postman",
+    "description": "Coleção completa de endpoints da API Sellers, Produtos e Vendas",
     "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
   },
   "item": [
@@ -10,7 +10,6 @@
       "name": "API Status",
       "request": {
         "method": "GET",
-        "header": [],
         "url": "{{base_url}}/api"
       }
     },
@@ -18,9 +17,7 @@
       "name": "Login",
       "request": {
         "method": "POST",
-        "header": [
-          { "key": "Content-Type", "value": "application/json" }
-        ],
+        "header": [{ "key": "Content-Type", "value": "application/json" }],
         "body": {
           "mode": "raw",
           "raw": "{\n  \"email\": \"teste@teste.com\",\n  \"password\": \"123456\"\n}"
@@ -32,9 +29,7 @@
       "name": "Get Me",
       "request": {
         "method": "GET",
-        "header": [
-          { "key": "Authorization", "value": "Bearer {{token}}", "type": "text" }
-        ],
+        "header": [{ "key": "Authorization", "value": "Bearer {{token}}" }],
         "url": "{{base_url}}/api/auth/me"
       }
     },
@@ -42,13 +37,10 @@
       "name": "Criar Seller",
       "request": {
         "method": "POST",
-        "header": [
-          { "key": "Content-Type", "value": "application/json" }
-        ],
+        "header": [{ "key": "Content-Type", "value": "application/json" }],
         "body": {
           "mode": "raw",
-          "raw": "{\n  \"nome\": \"Novo Seller\",\n  \"cnpj\": \"123456789\",\n  \"email\": \"seller@teste.com\",\n \"celular\": \"5511970507045\",\n \"senha\": \"123456\"\n}"
-		 
+          "raw": "{\n  \"nome\": \"Novo Seller\",\n  \"cnpj\": \"123456789\",\n  \"email\": \"seller@teste.com\",\n  \"celular\": \"5511970507045\",\n  \"senha\": \"123456\"\n}"
         },
         "url": "{{base_url}}/api/sellers"
       }
@@ -57,73 +49,126 @@
       "name": "Ativar Seller",
       "request": {
         "method": "POST",
-        "header": [
-          { "key": "Content-Type", "value": "application/json" }
-        ],
+        "header": [{ "key": "Content-Type", "value": "application/json" }],
         "body": {
           "mode": "raw",
-		  "raw": "{\n  \"celular\":  \"5511970507045\",\n \"codigo\": \"8665\"\n}"
+          "raw": "{\n  \"celular\": \"5511970507045\",\n  \"codigo\": \"8665\"\n}"
         },
         "url": "{{base_url}}/api/sellers/activate"
       }
     },
     {
-      "name": "Get Seller by ID",
-      "request": {
-        "method": "GET",
-        "header": [],
-        "url": "{{base_url}}/api/sellers/1"
-      }
-    },
-    {
-      "name": "Update User",
-      "request": {
-        "method": "PUT",
-        "header": [
-          { "key": "Content-Type", "value": "application/json" }
-        ],
-        "body": {
-          "mode": "raw",
-          "raw": "{\n  \"nome\": \"User Atualizado\"\n}"
+      "name": "Produtos",
+      "item": [
+        {
+          "name": "Criar Produto",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{token}}" },
+              { "key": "Content-Type", "value": "multipart/form-data" }
+            ],
+            "body": {
+              "mode": "formdata",
+              "formdata": [
+                { "key": "name", "value": "Shampoo Antifrizz", "type": "text" },
+                { "key": "price", "value": "49.90", "type": "text" },
+                { "key": "quantity", "value": "10", "type": "text" },
+                { "key": "status", "value": "ativo", "type": "text" },
+                { "key": "image", "type": "file", "src": "" }
+              ]
+            },
+            "url": "{{base_url}}/product/"
+          }
         },
-        "url": "{{base_url}}/user/1"
-      }
+        {
+          "name": "Listar Produtos",
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "Authorization", "value": "Bearer {{token}}" }],
+            "url": "{{base_url}}/product/"
+          }
+        },
+        {
+          "name": "Buscar Produto por ID",
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "Authorization", "value": "Bearer {{token}}" }],
+            "url": "{{base_url}}/product/1"
+          }
+        },
+        {
+          "name": "Atualizar Produto",
+          "request": {
+            "method": "PUT",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{token}}" },
+              { "key": "Content-Type", "value": "multipart/form-data" }
+            ],
+            "body": {
+              "mode": "formdata",
+              "formdata": [
+                { "key": "name", "value": "Shampoo Antifrizz Premium", "type": "text" },
+                { "key": "price", "value": "59.90", "type": "text" },
+                { "key": "quantity", "value": "8", "type": "text" }
+              ]
+            },
+            "url": "{{base_url}}/product/1"
+          }
+        },
+        {
+          "name": "Alterar Status do Produto",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{token}}" },
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": { "mode": "raw", "raw": "{ \"is_active\": false }" },
+            "url": "{{base_url}}/product/1/status"
+          }
+        },
+        {
+          "name": "Remover Imagem do Produto",
+          "request": {
+            "method": "DELETE",
+            "header": [{ "key": "Authorization", "value": "Bearer {{token}}" }],
+            "url": "{{base_url}}/product/1/image"
+          }
+        }
+      ]
     },
     {
-      "name": "Delete Seller",
-      "request": {
-        "method": "DELETE",
-        "header": [],
-        "url": "{{base_url}}/api/sellers/1"
-      }
-    },
-    {
-      "name": "Inativar Usuário",
-      "request": {
-        "method": "PATCH",
-        "header": [
-          { "key": "Content-Type", "value": "application/json" }
-        ],
-        "url": "{{base_url}}/usuário/1/inativar"
-      }
-    },
-    {
-      "name": "Perfil",
-      "request": {
-        "method": "GET",
-        "header": [],
-        "url": "{{base_url}}/perfil/1"
-      }
+      "name": "Vendas",
+      "item": [
+        {
+          "name": "Criar Venda",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{token}}" },
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"product_id\": 1,\n  \"quantity\": 2\n}"
+            },
+            "url": "{{base_url}}/sales"
+          }
+        },
+        {
+          "name": "Listar Vendas",
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "Authorization", "value": "Bearer {{token}}" }],
+            "url": "{{base_url}}/sales"
+          }
+        }
+      ]
     }
   ],
   "variable": [
-    {
-      "key": "base_url",
-      "value": "http://localhost:5000"
-    },
-    {
-      "key": "token",
-      "value": ""
-    }
+    { "key": "base_url", "value": "http://localhost:5000" },
+    { "key": "token", "value": "" }
   ]
 }
