@@ -12,6 +12,7 @@ if project_root not in sys.path:
 # 🛑 FIM DO BLOCO DE AJUSTE DE PATH
 
 from flask import Flask
+from flask_cors import CORS
 from src.config.data_base import init_db, db
 from src.routes import init_routes
 
@@ -22,6 +23,7 @@ def create_app():
     Função que cria e configura a aplicação Flask.
     """
     app = Flask(__name__)
+    CORS(app)
 
     app.config["JWT_SECRET_KEY"] = "obsidian"
     jwt = JWTManager(app)
