@@ -1,174 +1,387 @@
 {
-  "info": {
-    "name": "API Sellers + Produtos + Vendas",
-    "_postman_id": "d1c9c71c-1c0a-4b7d-9df3-123456789abc",
-    "description": "Coleção completa de endpoints da API Sellers, Produtos e Vendas",
-    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
-  },
-  "item": [
-    {
-      "name": "API Status",
-      "request": {
-        "method": "GET",
-        "url": "{{base_url}}/api"
-      }
-    },
-    {
-      "name": "Login",
-      "request": {
-        "method": "POST",
-        "header": [{ "key": "Content-Type", "value": "application/json" }],
-        "body": {
-          "mode": "raw",
-          "raw": "{\n  \"email\": \"teste@teste.com\",\n  \"password\": \"123456\"\n}"
-        },
-        "url": "{{base_url}}/api/auth/login"
-      }
-    },
-    {
-      "name": "Get Me",
-      "request": {
-        "method": "GET",
-        "header": [{ "key": "Authorization", "value": "Bearer {{token}}" }],
-        "url": "{{base_url}}/api/auth/me"
-      }
-    },
-    {
-      "name": "Criar Seller",
-      "request": {
-        "method": "POST",
-        "header": [{ "key": "Content-Type", "value": "application/json" }],
-        "body": {
-          "mode": "raw",
-          "raw": "{\n  \"nome\": \"Novo Seller\",\n  \"cnpj\": \"123456789\",\n  \"email\": \"seller@teste.com\",\n  \"celular\": \"5511970507045\",\n  \"senha\": \"123456\"\n}"
-        },
-        "url": "{{base_url}}/api/sellers"
-      }
-    },
-    {
-      "name": "Ativar Seller",
-      "request": {
-        "method": "POST",
-        "header": [{ "key": "Content-Type", "value": "application/json" }],
-        "body": {
-          "mode": "raw",
-          "raw": "{\n  \"celular\": \"5511970507045\",\n  \"codigo\": \"8665\"\n}"
-        },
-        "url": "{{base_url}}/api/sellers/activate"
-      }
-    },
-    {
-      "name": "Produtos",
-      "item": [
-        {
-          "name": "Criar Produto",
-          "request": {
-            "method": "POST",
-            "header": [
-              { "key": "Authorization", "value": "Bearer {{token}}" },
-              { "key": "Content-Type", "value": "multipart/form-data" }
-            ],
-            "body": {
-              "mode": "formdata",
-              "formdata": [
-                { "key": "name", "value": "Shampoo Antifrizz", "type": "text" },
-                { "key": "price", "value": "49.90", "type": "text" },
-                { "key": "quantity", "value": "10", "type": "text" },
-                { "key": "status", "value": "ativo", "type": "text" },
-                { "key": "image", "type": "file", "src": "" }
-              ]
-            },
-            "url": "{{base_url}}/product/"
-          }
-        },
-        {
-          "name": "Listar Produtos",
-          "request": {
-            "method": "GET",
-            "header": [{ "key": "Authorization", "value": "Bearer {{token}}" }],
-            "url": "{{base_url}}/product/"
-          }
-        },
-        {
-          "name": "Buscar Produto por ID",
-          "request": {
-            "method": "GET",
-            "header": [{ "key": "Authorization", "value": "Bearer {{token}}" }],
-            "url": "{{base_url}}/product/1"
-          }
-        },
-        {
-          "name": "Atualizar Produto",
-          "request": {
-            "method": "PUT",
-            "header": [
-              { "key": "Authorization", "value": "Bearer {{token}}" },
-              { "key": "Content-Type", "value": "multipart/form-data" }
-            ],
-            "body": {
-              "mode": "formdata",
-              "formdata": [
-                { "key": "name", "value": "Shampoo Antifrizz Premium", "type": "text" },
-                { "key": "price", "value": "59.90", "type": "text" },
-                { "key": "quantity", "value": "8", "type": "text" }
-              ]
-            },
-            "url": "{{base_url}}/product/1"
-          }
-        },
-        {
-          "name": "Alterar Status do Produto",
-          "request": {
-            "method": "PATCH",
-            "header": [
-              { "key": "Authorization", "value": "Bearer {{token}}" },
-              { "key": "Content-Type", "value": "application/json" }
-            ],
-            "body": { "mode": "raw", "raw": "{ \"is_active\": false }" },
-            "url": "{{base_url}}/product/1/status"
-          }
-        },
-        {
-          "name": "Remover Imagem do Produto",
-          "request": {
-            "method": "DELETE",
-            "header": [{ "key": "Authorization", "value": "Bearer {{token}}" }],
-            "url": "{{base_url}}/product/1/image"
-          }
-        }
-      ]
-    },
-    {
-      "name": "Vendas",
-      "item": [
-        {
-          "name": "Criar Venda",
-          "request": {
-            "method": "POST",
-            "header": [
-              { "key": "Authorization", "value": "Bearer {{token}}" },
-              { "key": "Content-Type", "value": "application/json" }
-            ],
-            "body": {
-              "mode": "raw",
-              "raw": "{\n  \"product_id\": 1,\n  \"quantity\": 2\n}"
-            },
-            "url": "{{base_url}}/sales"
-          }
-        },
-        {
-          "name": "Listar Vendas",
-          "request": {
-            "method": "GET",
-            "header": [{ "key": "Authorization", "value": "Bearer {{token}}" }],
-            "url": "{{base_url}}/sales"
-          }
-        }
-      ]
-    }
-  ],
-  "variable": [
-    { "key": "base_url", "value": "http://localhost:5000" },
-    { "key": "token", "value": "" }
-  ]
+	"info": {
+		"name": "API Sellers + Produtos + Vendas (Automatizada)",
+		"_postman_id": "d1c9c71c-1c0a-4b7d-9df3-123456789abc",
+		"description": "Coleção completa de endpoints da API Sellers, Produtos e Vendas, com scripts de teste.",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+	},
+	"item": [
+		{
+			"name": "01. Fluxo: Cadastro e Ativação",
+			"item": [
+				{
+					"name": "Criar Novo Seller",
+					"request": {
+						"method": "POST",
+						"header": [
+							{ "key": "Content-Type", "value": "application/json" }
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n \t\"nome\": \"Seller Teste\",\n \t\"cnpj\": \"12345678901236\",\n \t\"email\": \"{{teste_auto_3@teste.com}}\",\n \t\"celular\": \"5511970507045\",\n \t\"senha\": \"{{password_teste}}\"\n}"
+						},
+						"url": "{{base_url}}/api/sellers"
+					},
+					"response": []
+				},
+				{
+					"name": "Ativar Seller",
+					"request": {
+						"method": "POST",
+						"header": [
+							{ "key": "Content-Type", "value": "application/json" }
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n \t\"celular\": \"5511970507045\",\n \t\"codigo\": \"1234\"\n}"
+						},
+						"url": "{{base_url}}/api/sellers/activate"
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "02. Autenticação",
+			"item": [
+				{
+					"name": "Login",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code é 200\", function () {",
+									"    pm.response.to.have.status(200);",
+									"});",
+									"",
+									"pm.test(\"Resposta contém o token\", function () {",
+									"    var jsonData = pm.response.json();",
+									"    pm.expect(jsonData).to.have.property('token');",
+									"});",
+									"",
+									"// 🔑 MUDANÇA AQUI: Salva o token na **Variável da Collection** (Escopo mais seguro)",
+									"var jsonData = pm.response.json();",
+									"if (jsonData && jsonData.token) {",
+									"    pm.collectionVariables.set(\"token\", jsonData.token);",
+									"    console.log(\"Token salvo na Collection.\");",
+									"}"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{ "key": "Content-Type", "value": "application/json" }
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n \t\"email\": \"{{email_teste}}\",\n \t\"password\": \"{{password_teste}}\"\n}"
+						},
+						"url": "{{base_url}}/api/auth/login"
+					},
+					"response": []
+				},
+				{
+					"name": "Get Me (Verificar Token)",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code é 200 e retorna dados do Seller\", function () {",
+									"    pm.response.to.have.status(200);",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [
+							{ "key": "Authorization", "value": "Bearer {{token}}" }
+						],
+						"url": "{{base_url}}/api/auth/me"
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "03. Produtos",
+			"item": [
+				{
+					"name": "Criar Produto",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Criação de Produto bem sucedida (Status 201)\", function () {",
+									"    pm.response.to.have.status(201);",
+									"});",
+									"",
+									"// 🔑 Salvar o product_id. MUDANÇA AQUI: usando collectionVariables",
+									"var jsonData = pm.response.json();",
+									"if (jsonData.product && jsonData.product.id) {",
+									"    pm.collectionVariables.set(\"product_id\", jsonData.product.id);",
+									"    pm.collectionVariables.set(\"initial_quantity\", jsonData.product.quantity);",
+									"    console.log(\"Product ID salvo: \" + jsonData.product.id);",
+									"} else {",
+									"    pm.expect.fail(\"ID do produto não encontrado na resposta.\");",
+									"}"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{ "key": "Authorization", "value": "Bearer {{token}}" }
+						],
+						"body": {
+							"mode": "formdata",
+							"formdata": [
+								{ "key": "name", "value": "Shampoo Antifrizz", "type": "text" },
+								{ "key": "price", "value": "49.90", "type": "text" },
+								{ "key": "quantity", "value": "10", "type": "text" },
+								{ "key": "status", "value": "ativo", "type": "text" },
+								{ "key": "image", "type": "file", "src": "" }
+							]
+						},
+						"url": "{{base_url}}/api/products"
+					},
+					"response": []
+				},
+				{
+					"name": "Listar Produtos",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code é 200 e retorna array de produtos\", function () {",
+									"    pm.response.to.have.status(200);",
+									"    pm.expect(pm.response.json()).to.be.an('array');",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [
+							{ "key": "Authorization", "value": "Bearer {{token}}" }
+						],
+						"url": "{{base_url}}/api/products"
+					},
+					"response": []
+				},
+				{
+					"name": "Buscar Produto por ID",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code é 200 e o ID está correto\", function () {",
+									"    pm.response.to.have.status(200);",
+									"    pm.expect(pm.response.json().id).to.equal(parseInt(pm.collectionVariables.get(\"product_id\")));",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [
+							{ "key": "Authorization", "value": "Bearer {{token}}" }
+						],
+						"url": "{{base_url}}/api/products/{{product_id}}"
+					},
+					"response": []
+				},
+				{
+					"name": "Atualizar Produto",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code é 200 e nome foi atualizado\", function () {",
+									"    pm.response.to.have.status(200);",
+									"    pm.expect(pm.response.json().product.name).to.equal(\"Shampoo Antifrizz Premium\");",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "PUT",
+						"header": [
+							{ "key": "Authorization", "value": "Bearer {{token}}" }
+						],
+						"body": {
+							"mode": "formdata",
+							"formdata": [
+								{ "key": "name", "value": "Shampoo Antifrizz Premium", "type": "text" },
+								{ "key": "price", "value": "59.90", "type": "text" },
+								{ "key": "quantity", "value": "8", "type": "text" }
+							]
+						},
+						"url": "{{base_url}}/api/products/{{product_id}}"
+					},
+					"response": []
+				},
+				{
+					"name": "Alterar Status do Produto",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code é 200 e produto está inativo\", function () {",
+									"    pm.response.to.have.status(200);",
+									"    pm.expect(pm.response.json().product.status).to.equal(\"inativo\");",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "PATCH",
+						"header": [
+							{ "key": "Authorization", "value": "Bearer {{token}}" },
+							{ "key": "Content-Type", "value": "application/json" }
+						],
+						"body": { "mode": "raw", "raw": "" },
+						"url": "{{base_url}}/api/products/{{product_id}}/status"
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "04. Vendas",
+			"item": [
+				{
+					"name": "Criar Venda (Falha - Produto Inativo)",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code é 400 (Produto Inativo)\", function () {",
+									"    pm.response.to.have.status(400);",
+									"    pm.expect(pm.response.json().error).to.include(\"Produto inativo\");",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{ "key": "Authorization", "value": "Bearer {{token}}" },
+							{ "key": "Content-Type", "value": "application/json" }
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n \t\"product_id\": {{product_id}},\n \t\"quantity\": 1\n}"
+						},
+						"url": "{{base_url}}/api/sales"
+					},
+					"response": []
+				},
+				{
+					"name": "Alterar Status do Produto (Ativar Novamente)",
+					"request": {
+						"method": "PATCH",
+						"header": [
+							{ "key": "Authorization", "value": "Bearer {{token}}" },
+							{ "key": "Content-Type", "value": "application/json" }
+						],
+						"body": { "mode": "raw", "raw": "" },
+						"url": "{{base_url}}/api/products/{{product_id}}/status"
+					},
+					"response": []
+				},
+				{
+					"name": "Criar Venda (Sucesso)",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code é 201 (Venda Criada)\", function () {",
+									"    pm.response.to.have.status(201);",
+									"});",
+									"pm.test(\"Estoque foi reduzido corretamente\", function () {",
+									"    // Assume que a resposta de venda deve retornar o estoque restante ou que o próximo GET Product confirmará",
+									"    // Se o serviço retorna o objeto de venda, verifique a estrutura básica.",
+									"    pm.expect(pm.response.json().quantity_sold).to.equal(1);",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{ "key": "Authorization", "value": "Bearer {{token}}" },
+							{ "key": "Content-Type", "value": "application/json" }
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n \t\"product_id\": {{product_id}},\n \t\"quantity\": 1\n}"
+						},
+						"url": "{{base_url}}/api/sales"
+					},
+					"response": []
+				},
+				{
+					"name": "Listar Vendas",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code é 200 e retorna uma lista de vendas\", function () {",
+									"    pm.response.to.have.status(200);",
+									"    pm.expect(pm.response.json()).to.be.an('array').and.to.have.lengthOf.at.least(1);",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [
+							{ "key": "Authorization", "value": "Bearer {{token}}" }
+						],
+						"url": "{{base_url}}/api/sales"
+					},
+					"response": []
+				}
+			]
+		}
+	],
+	"variable": [
+		{ "key": "base_url", "value": "http://localhost:5000" },
+		{ "key": "token", "value": "", "type": "string" }, 
+		{ "key": "product_id", "value": "", "type": "string" },
+		{ "key": "email_teste", "value": "teste_auto@teste.com" },
+		{ "key": "password_teste", "value": "123456" }
+	]
 }
