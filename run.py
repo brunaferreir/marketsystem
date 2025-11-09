@@ -1,3 +1,16 @@
+import sys
+import os
+
+# 🛑 SOLUÇÃO FINAL PARA ModuleNotFoundError:
+# Garante que o diretório raiz (marketsystem/) seja o primeiro lugar que o Python procure módulos.
+project_root = os.path.dirname(os.path.abspath(__file__))
+
+# Insere o caminho na PRIMEIRA posição do sys.path (índice 0)
+# Isso deve corrigir o erro "ModuleNotFoundError: No module named 'src.Model'"
+if project_root not in sys.path:
+    sys.path.insert(0, project_root)
+# 🛑 FIM DO BLOCO DE AJUSTE DE PATH
+
 from flask import Flask
 from src.config.data_base import init_db, db
 from src.routes import init_routes
@@ -19,7 +32,8 @@ def create_app():
 
  # cria qualquer tabela nova que ainda não existe (ActivationCode)
     with app.app_context():
-        db.create_all()
+        # db.create_all() deve ser chamado após todas as classes de Modelo terem sido importadas.
+        db.create_all() 
 
     return app
 
