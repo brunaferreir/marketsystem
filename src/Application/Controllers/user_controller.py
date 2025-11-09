@@ -52,6 +52,11 @@ class UserController:
         if not data:
             return make_response(jsonify({"erro": "Dados inválidos"}), 400)
         
+        # ATENÇÃO: Verifique a consistência dos nomes dos campos aqui (nome vs name, senha vs password)
+        # O código abaixo assume que o payload do request usa: nome, cnpj, email, celular, senha
+        # e que o Service usa: name, cnpj, email, celular, password
+        # Se os nomes forem diferentes, seu Service pode estar recebendo None!
+        
         result = UserService.create_seller(
             data.get("nome"),
             data.get("cnpj"),
@@ -59,6 +64,12 @@ class UserController:
             data.get("celular"),
             data.get("senha")
         )
+      
+        if "error" in result:
+           
+            return jsonify(result), 400
+            
+    
         return jsonify(result), 200
     
 #---------------------- POST ATIVA SELLER COM CÓDIGO
@@ -87,9 +98,11 @@ class UserController:
 
             seller = UserService.authenticate_user(email, password)
 
+           # ...
             if seller:
-                access_token = create_access_token(identity=seller.id)
+                access_token = create_access_token(identity=str(seller.id)) # ⬅️ CORRIGIDO: CONVERSÃO PARA STRING
                 return jsonify({"token": access_token}), 200
+# ...
             else:
                 return make_response(jsonify({"erro": "Credenciais inválidas"}), 401)
         

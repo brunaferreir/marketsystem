@@ -63,20 +63,23 @@ class UserService:
     @staticmethod
     def create_seller(name, cnpj, email, celular, password):
         try:
+            # 1. Cria o Usuário (o status é 'inactive' por padrão)
             user = UserService.create_user(name, cnpj, email, celular, password)
             
+            # 2. GERA O CÓDIGO (mantido)
             codigo = str(random.randint(1000, 9999))
-            
-            enviar_codigo_whatsapp(celular, codigo)
+           
+            print(f"--- MOCK WHATSAPP: Código de Ativação gerado para {celular}: {codigo} ---")
 
+            # 4. Cria e Salva o Código de Ativação no DB (MANTIDO)
             activation = ActivationCode(code=codigo, user_id=user.id)
             db.session.add(activation)
             db.session.commit()
 
-            return {"message": "Usuário cadastrado. Código de ativação enviado por WhatsApp."}
+            return {"message": f"Usuário cadastrado. Código de ativação: {codigo} (MOCK)"}
         except Exception as e:
+            # Este bloco já foi corrigido para retornar o erro no Controller 400
             return {"error": f"Erro ao criar vendedor: {e}"}
-
    
     @staticmethod
     def activate_seller(celular, codigo):
