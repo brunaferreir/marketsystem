@@ -7,7 +7,7 @@ from src.Application.Service.product_service import ProductService
 
 product_bp = Blueprint("product_bp", __name__, url_prefix="/api/products")
 
-# 🧩 Diretório padrão de uploads
+
 UPLOAD_FOLDER = "uploads"
 
 @product_bp.route("/", methods=["POST"])
@@ -17,30 +17,41 @@ def create_product():
     Cria um novo produto vinculado ao usuário autenticado.
     """
     user_id = get_jwt_identity()
-    name = request.form.get("name")
-    price = request.form.get("price")
-    quantity = request.form.get("quantity")
-    status = request.form.get("status", "ativo")
-    image_file = request.files.get("image")
+    
+   
+    data = request.json 
+    
+    
+    name = data.get("name")
+    price = data.get("price")
+    quantity = data.get("quantity")
+    status = data.get("status", "ativo")
+    image_url = data.get("image") 
 
+  
+    
     if not all([name, price, quantity]):
         return jsonify({"error": "Campos obrigatórios: name, price, quantity"}), 400
 
     try:
+      
         product = ProductService.create_product(
             user_id=user_id,
             name=name,
             price=float(price),
             quantity=int(quantity),
             status=status,
-            image_file=image_file
+            image_url=image_url 
         )
         return jsonify({
             "message": "Produto criado com sucesso!",
             "product": product.to_dict()
         }), 201
     except Exception as e:
-        return jsonify({"error": str(e)}), 500
+      
+        return jsonify({"error": f"Erro ao criar produto: {str(e)}"}), 500
+
+
 
 
 @product_bp.route("/", methods=["GET"])
