@@ -6,6 +6,7 @@ class UserController:
     @staticmethod
     def register_user():
         data = request.get_json()
+        # CORREÇÃO 1: Garantir que a leitura do JSON usa 'name' e 'password'
         name = data.get('name')
         cnpj = data.get('cnpj')
         email = data.get('email')
@@ -52,24 +53,20 @@ class UserController:
         if not data:
             return make_response(jsonify({"erro": "Dados inválidos"}), 400)
         
-        # ATENÇÃO: Verifique a consistência dos nomes dos campos aqui (nome vs name, senha vs password)
-        # O código abaixo assume que o payload do request usa: nome, cnpj, email, celular, senha
-        # e que o Service usa: name, cnpj, email, celular, password
-        # Se os nomes forem diferentes, seu Service pode estar recebendo None!
-        
+        # CORREÇÃO 2: Garantir que o Service é chamado com 'name' e 'password'
         result = UserService.create_seller(
-            data.get("nome"),
+            data.get("name"),    # CORRIGIDO
             data.get("cnpj"),
             data.get("email"),
             data.get("celular"),
-            data.get("senha")
+            data.get("password") # CORRIGIDO
         )
       
         if "error" in result:
-           
+            
             return jsonify(result), 400
             
-    
+        
         return jsonify(result), 200
     
 #---------------------- POST ATIVA SELLER COM CÓDIGO
@@ -83,7 +80,7 @@ class UserController:
             data.get("celular"),
             data.get("codigo")
         )
-        return jsonify(result), 200    
+        return jsonify(result), 200     
 
 #--------------------------------- POST LOGIN SELLER
     @staticmethod
@@ -91,7 +88,7 @@ class UserController:
         try:
             data = request.get_json()
             email = data.get('email')
-            password = data.get('password')
+            password = data.get('password') # Lendo corretamente 'password'
 
             if not email or not password:
                 return make_response(jsonify({"erro": "Email e senha são obrigatórios"}), 400)
@@ -100,7 +97,7 @@ class UserController:
 
            # ...
             if seller:
-                access_token = create_access_token(identity=str(seller.id)) # ⬅️ CORRIGIDO: CONVERSÃO PARA STRING
+                access_token = create_access_token(identity=str(seller.id))
                 return jsonify({"token": access_token}), 200
 # ...
             else:
@@ -108,9 +105,9 @@ class UserController:
         
         except Exception as e:
             print(f"Erro no login: {e}")
-            return make_response(jsonify({"erro": "Ocorreu um erro interno ao tentar fazer login."}), 500)  
+            return make_response(jsonify({"erro": "Ocorreu um erro interno ao tentar fazer login."}), 500)   
 
-#---------------------------------  PUT ATUALIZA 1 SELLER
+#--------------------------------- 	PUT ATUALIZA 1 SELLER
     @staticmethod
     def update_user(user_id):
         try:
@@ -150,7 +147,7 @@ class UserController:
                 return "<h1>Página de Perfil Padrão</h1>"
         except Exception as e:
             print(f"Erro ao buscar perfil do usuário: {e}")
-            return "Ocorreu um erro ao carregar o perfil.", 500    
+            return "Ocorreu um erro ao carregar o perfil.", 500     
         
     @staticmethod
     def delete_user(user_id):
@@ -162,9 +159,9 @@ class UserController:
                 return make_response(jsonify({"erro": "Usuário não encontrado"}), 404)
         except Exception as e:
             print(f"Erro ao deletar usuário: {e}")
-            return make_response(jsonify({"erro": "Erro interno ao tentar deletar  o usuário"}), 500)
+            return make_response(jsonify({"erro": "Erro interno ao tentar deletar 	o usuário"}), 500)
         
-        
+    
     @staticmethod
     def inactivate_user(user_id):
         try:
@@ -178,5 +175,4 @@ class UserController:
                 return make_response(jsonify({"Erro": "Usuário não encontrado"}), 404)
         except Exception as e:
             print(f"Erro ao inativar usuário: {e}")
-            return make_response(jsonify({"Erro": "Erro interno  ao tentar inativar o usuário"}), 500)
-            
+            return make_response(jsonify({"Erro": "Erro interno 	ao tentar inativar o usuário"}), 500)
