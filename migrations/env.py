@@ -6,7 +6,7 @@ from sqlalchemy import pool
 from alembic import context
 
 # ----------------------------------------------------------------------
-# AS ALTERAÇÕES COMEÇAM AQUI
+# INÍCIO DAS ALTERAÇÕES
 # ----------------------------------------------------------------------
 
 # 1. Ajuste no PATH: Garante que as importações abaixo funcionem
@@ -35,12 +35,11 @@ if config.config_file_name is not None:
 
 # add your model's MetaData object here
 # for 'autogenerate' support
-# target_metadata = mymodel.Base.metadata # Linha Original
 # 3. Defina o target_metadata como o metadata do Flask-SQLAlchemy
 target_metadata = db.metadata
 
 # ----------------------------------------------------------------------
-# O RESTANTE DO CÓDIGO PERMANECE INALTERADO
+# FIM DA SEÇÃO DE METADATA
 # ----------------------------------------------------------------------
 
 # other values from the config, defined by the needs of env.py,
@@ -50,17 +49,7 @@ target_metadata = db.metadata
 
 
 def run_migrations_offline() -> None:
-    """Run migrations in 'offline' mode.
-
-    This configures the context with just a URL
-    and not an Engine, though an Engine is acceptable
-    here as well.  By skipping the Engine creation
-    we don't even need a DBAPI to be available.
-
-    Calls to context.execute() here emit the given string to the
-    script output.
-
-    """
+    """Run migrations in 'offline' mode."""
     url = config.get_main_option("sqlalchemy.url")
     context.configure(
         url=url,
@@ -75,17 +64,24 @@ def run_migrations_offline() -> None:
 
 def run_migrations_online() -> None:
     """Run migrations in 'online' mode.
-
-    In this scenario we need to create an Engine
-    and associate a connection with the context.
-
+    
+    🟢 CORREÇÃO: Lê a DATABASE_URL do ambiente (Render) antes de ler o alembic.ini.
     """
-    connectable = engine_from_config(
-        config.get_section(config.config_ini_section, {}),
-        prefix="sqlalchemy.",
-        poolclass=pool.NullPool,
-    )
+    
+    # Tenta usar a variável de ambiente DATABASE_URL (usada em produção/Render)
+    connectable = os.environ.get("DATABASE_URL")
 
+    if connectable is None:
+        # Se DATABASE_URL não estiver definida (ambiente local),
+        # Volta a usar a configuração do alembic.ini
+        connectable = engine_from_config(
+            config.get_section(config.config_ini_section, {}),
+            prefix="sqlalchemy.",
+            poolclass=pool.NullPool,
+        )
+
+    # Nota: Se 'connectable' for uma string de URL (do os.environ), a conexão é feita aqui.
+    # Se for um objeto Engine (do engine_from_config), a conexão também funciona.
     with connectable.connect() as connection:
         context.configure(
             connection=connection, target_metadata=target_metadata
