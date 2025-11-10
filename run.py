@@ -20,6 +20,7 @@ def create_app():
     Função que cria e configura a aplicação Flask.
     """
     app = Flask(__name__)
+    app.url_map.strict_slashes = False
     
   
     CORS(app, resources={r"/*": {"origins": "*", "allow_headers": ["Content-Type", "Authorization"]}})
