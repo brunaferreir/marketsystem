@@ -15,15 +15,26 @@ def init_routes(app):
     # ✅ registra blueprints
     app.register_blueprint(product_bp)
     app.register_blueprint(sale_bp)
+    
+    # 🔴 NOVO: Rota Raiz (Health Check)
+    @app.route('/', methods=['GET'])
+    def root_status():
+        """Redireciona a raiz para o status da API ou retorna status OK."""
+        
+        return make_response(jsonify({
+            "status": "online",
+            "service": "Market System Backend API",
+            "message": "Servidor Gunicorn/Flask rodando no Render."
+        }), 200)
 
-    # 🔹 rota de verificação básica
+
     @app.route('/api', methods=['GET'])
     def api():
         return make_response(jsonify({
             "mensagem": "API - OK; Docker - Up",
         }), 200)
-
-    # 🔹 rota para pegar o usuário autenticado
+    
+    # rota para pegar o usuário autenticado
     @app.route('/api/auth/me', methods=['GET'])
     @jwt_required()
     def get_me():
@@ -35,46 +46,42 @@ def init_routes(app):
 
         return jsonify(user.to_dict()), 200
 
-    # 🔹 buscar seller por ID
+    # buscar seller por ID
     @app.route('/api/sellers/<int:user_id>', methods=['GET'])
     def get_seller_by_id(user_id):
         return UserController.get_seller_by_id(user_id)
 
-    # 🔹 criar seller
+    # criar seller
     @app.route('/api/sellers', methods=['POST'])
     def create_seller():
         return UserController.create_seller()
 
-    # 🔹 ativar seller (via Twilio)
-    @app.route('/api/sellers/activate', methods=['POST'])
+    # ativar seller (via Twilio)
+    @app.route('/api/auth/activate', methods=['POST'])
     def ativar_seller():
         return UserController.activate_seller()
 
-    # 🔹 login seller
+    # login seller
     @app.route('/api/auth/login', methods=['POST'])
     def login_seller():
         return UserController.login_seller()
 
-    # 🔹 atualizar seller
-    @app.route('/user/<int:user_id>', methods=['PUT'])
+    # atualizar seller
+    @app.route('/api/users/<int:user_id>', methods=['PUT']) # Ajustado para /api
     def update_user(user_id):
         return UserController.update_user(user_id)
 
-    # 🔹 rota de redirecionamento simples
+    # rota de redirecionamento simples
     @app.route('/inicio')
     def inicio():
-        return redirect(url_for("api"))
+        # Redireciona para a nova rota raiz /
+        return redirect(url_for("root_status"))
 
-    # 🔹 visualizar perfil
-    @app.route('/perfil')
-    @app.route('/perfil/<int:user_id>')
-    def perfil(user_id=None):
-        return UserController.get_perfil(user_id)
-
-    # 🔹 deletar seller
+    
+    # deletar seller
     @app.route('/api/sellers/<int:user_id>', methods=['DELETE'])
     def delete_seller(user_id):
         return UserController.delete_user(user_id)
 
-    # 🔹 inativar seller
-    app.route("/usuario/<int:user_id>/inativar", methods=["PATCH"])(UserController.inactivate_user)
+   
+    app.route("/api/users/<int:user_id>/inactivate", methods=["PATCH"])(UserController.inactivate_user)
