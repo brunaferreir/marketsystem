@@ -20,12 +20,14 @@ class Product(db.Model):
     user_id = db.Column(db.Integer, db.ForeignKey("users.id"), nullable=False)
     user = db.relationship("User", backref=db.backref("products", lazy=True))
 
+
+
     def to_dict(self):
         return {
             "id": self.id,
             "name": self.name,
-            "price": self.price,
-            "quantity": self.quantity,
+            "price": float(self.price), 
+            "quantity": int(self.quantity), 
             "status": self.status,
             "image_path": self.image_path,
             "user_id": self.user_id,
