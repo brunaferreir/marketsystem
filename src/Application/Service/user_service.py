@@ -34,8 +34,10 @@ class UserService:
 
     @staticmethod
     def get_seller_by_id(user_id=None):
+        # *** SIMPLIFICADO: Usa db.session.get() para busca direta por PK ***
         if user_id:
-            return db.session.get(User, user_id)
+            # db.session.get(Model, id) é a forma mais robusta de buscar por chave primária.
+            return db.session.get(User, user_id) 
         return None
 
     @staticmethod
@@ -78,7 +80,6 @@ class UserService:
 
             return {"message": f"Usuário cadastrado. Código de ativação: {codigo} (MOCK)"}
         except Exception as e:
-            # Este bloco já foi corrigido para retornar o erro no Controller 400
             return {"error": f"Erro ao criar vendedor: {e}"}
     
     @staticmethod
@@ -94,7 +95,7 @@ class UserService:
             return {"error": "Código inválido ou já usado."}
 
         activation.used = True
-        user.status = "ativo" # CORREÇÃO: Garante status em português
+        user.status = "ativo" 
         db.session.commit()
 
         return {"message": "Usuário ativado com sucesso!"}
@@ -106,11 +107,9 @@ class UserService:
         if not user:
             return {"error": "Credenciais inválidas."}
 
-        # CORREÇÃO: Muda a verificação de status para "ativo" (em português)
         if user.status != "ativo": 
             return {"error": "Usuário inativo. Ative primeiro."}
 
-        # CORREÇÃO: Garante que o ID é passado como STRING para o JWT
         token = create_access_token(identity=str(user.id))
         return {"token": token, "message": "Login realizado com sucesso!"}
     
@@ -119,10 +118,10 @@ class UserService:
     def delete_user(user_id):
         user = db.session.get(User, user_id)
         if user:
+            # Procura por códigos de ativação associados antes de deletar
             activation = db.session.query(ActivationCode).filter_by(user_id=user.id).first()
             if activation:
                 db.session.delete(activation)
-            
             
             db.session.delete(user)
             db.session.commit()
