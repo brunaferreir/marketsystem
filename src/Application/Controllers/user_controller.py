@@ -97,7 +97,7 @@ class UserController:
 
            # ...
             if seller:
-                access_token = create_access_token(identity=seller.id)
+                access_token = create_access_token(identity=str(seller.id))
                 return jsonify({"token": access_token}), 200
 # ...
             else:
