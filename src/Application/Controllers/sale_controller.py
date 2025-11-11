@@ -1,5 +1,3 @@
-# EM: src/Application/Controllers/sale_controller.py
-
 from flask import Blueprint, request, jsonify
 from src.Application.Service.sale_service import SaleService
 from flask_jwt_extended import jwt_required, get_jwt_identity
@@ -9,24 +7,27 @@ sale_bp = Blueprint("sale_bp", __name__, url_prefix="/api/sales")
 @sale_bp.route("/", methods=["POST"])
 @jwt_required()
 def create_sale():
-    data = request.get_json()
-    seller_id_str = get_jwt_identity() # Pega o ID do token
+    seller_id_str = get_jwt_identity()
     
-    # *** AJUSTE FINAL: CONVERSÃO ROBUSTA DO ID ***
+    # *** ESTE TRECHO É O SEU "PRINT()" ***
     try:
-        # Tenta converter o ID para inteiro. Cobrirá se for None (TypeError) ou não-numérico (ValueError).
         seller_id = int(seller_id_str)
+        # Se for bem-sucedido, retorna 200 e o ID. SEU ID DEVE ESTAR AQUI!
+        return jsonify({
+            "DIAGNOSTICO_SUCESSO": "Token Decodificado Corretamente",
+            "SELLER_ID_DECODIFICADO": seller_id,
+            "TIPO_DECODIFICADO": str(type(seller_id))
+        }), 200
+        
     except (ValueError, TypeError):
-        # Se falhar, o token é inválido/ausente. Retorna 401
-        return jsonify({"error": "Token inválido ou ausente. Faça login novamente."}), 401
-    
-    product_id = data.get("product_id")
-    quantity = data.get("quantity")
+        # Se falhar (ID for None, por exemplo), retorna 401
+        return jsonify({
+            "DIAGNOSTICO_FALHA": "Token não decodificou a identidade (ID)",
+            "VALOR_BRUTO": str(seller_id_str)
+        }), 401
+    # *** FIM DO DIAGNÓSTICO TEMPORÁRIO ***
 
-    # Chama o serviço
-    response, status = SaleService.create_sale(seller_id, product_id, quantity)
-    return jsonify(response), status
-
+# A rota list_sales não precisa ser alterada.
 @sale_bp.route("/", methods=["GET"])
 @jwt_required()
 def list_sales():
