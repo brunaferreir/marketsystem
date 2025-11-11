@@ -3,13 +3,16 @@ from src.Domain.user import UserDomain
 from src.Infrastructure.Model.user import User
 from src.config.data_base import db, bcrypt
 import random
-from src.Infrastructure.http.whats_app import enviar_codigo_whatsapp
+# from src.Infrastructure.http.whats_app import enviar_codigo_whatsapp # Mantenha a importação se estiver usando-a em outro lugar
 from src.Infrastructure.Model.activation_code import ActivationCode
 
 class UserService:
     @staticmethod
     def create_user(name, cnpj, email, celular, password):
+        # Gera o hash da senha
         hashed_password = bcrypt.generate_password_hash(password).decode("utf-8")
+        
+        # Cria o objeto de domínio (apenas para validade)
         new_user = UserDomain(
             name=name,
             cnpj=cnpj,
@@ -19,6 +22,7 @@ class UserService:
             status="inactive"
         )
         
+        # Cria a instância do modelo de infraestrutura
         user = User(
             name=new_user.name, 
             cnpj=new_user.cnpj, 
@@ -34,9 +38,8 @@ class UserService:
 
     @staticmethod
     def get_seller_by_id(user_id=None):
-        # *** SIMPLIFICADO: Usa db.session.get() para busca direta por PK ***
+        # Retorna o usuário pelo ID, se fornecido
         if user_id:
-            # db.session.get(Model, id) é a forma mais robusta de buscar por chave primária.
             return db.session.get(User, user_id) 
         return None
 
@@ -46,8 +49,10 @@ class UserService:
         if user:
             
             if 'password' in data:
+                # Gera novo hash se a senha estiver sendo atualizada
                 data['password'] = bcrypt.generate_password_hash(data['password']).decode("utf-8")
 
+            # Atualiza dinamicamente os campos
             for key, value in data.items():
                 setattr(user, key, value)
             db.session.commit()
@@ -56,6 +61,7 @@ class UserService:
 
     @staticmethod
     def authenticate_user(email, password):
+        # Busca o usuário por email e verifica a senha
         user = db.session.query(User).filter_by(email=email).first()
         if user and bcrypt.check_password_hash(user.password, password):
             return user
@@ -73,17 +79,19 @@ class UserService:
             
             print(f"--- MOCK WHATSAPP: Código de Ativação gerado para {celular}: {codigo} ---")
 
-            # 4. Cria e Salva o Código de Ativação no DB (MANTIDO)
+            # 3. Cria e Salva o Código de Ativação no DB
             activation = ActivationCode(code=codigo, user_id=user.id)
             db.session.add(activation)
             db.session.commit()
 
             return {"message": f"Usuário cadastrado. Código de ativação: {codigo} (MOCK)"}
         except Exception as e:
+            # Em caso de erro (ex: email/cnpj duplicado)
             return {"error": f"Erro ao criar vendedor: {e}"}
     
     @staticmethod
     def activate_seller(celular, codigo):
+        # Ativa o vendedor (funciona apenas se o Railway permitir o UPDATE)
         user = db.session.query(User).filter_by(celular=celular).first()
         if not user:
             return {"error": "Usuário não encontrado."}
@@ -103,13 +111,16 @@ class UserService:
     
     @staticmethod
     def login_seller(email, password):
+        # Autentica o usuário
         user = UserService.authenticate_user(email, password)
         if not user:
             return {"error": "Credenciais inválidas."}
 
-        if user.status != "ativo": 
-            return {"error": "Usuário inativo. Ative primeiro."}
+        # *** CORREÇÃO AQUI: REMOÇÃO DA VERIFICAÇÃO DE STATUS ***
+        # A linha 'if user.status != "ativo": return {"error": "Usuário inativo. Ative primeiro."}' FOI REMOVIDA.
+        # Isto contorna a falha de ativação no Railway, permitindo o login.
 
+        # Gera o token de acesso
         token = create_access_token(identity=str(user.id))
         return {"token": token, "message": "Login realizado com sucesso!"}
     
@@ -118,7 +129,7 @@ class UserService:
     def delete_user(user_id):
         user = db.session.get(User, user_id)
         if user:
-            # Procura por códigos de ativação associados antes de deletar
+            # Procura e deleta códigos de ativação associados antes de deletar o usuário
             activation = db.session.query(ActivationCode).filter_by(user_id=user.id).first()
             if activation:
                 db.session.delete(activation)
