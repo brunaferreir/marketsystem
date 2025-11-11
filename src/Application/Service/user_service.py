@@ -42,7 +42,7 @@ class UserService:
     def update_user(user_id, data):
         user = db.session.get(User, user_id)
         if user:
-           
+            
             if 'password' in data:
                 data['password'] = bcrypt.generate_password_hash(data['password']).decode("utf-8")
 
@@ -68,7 +68,7 @@ class UserService:
             
             # 2. GERA O CÓDIGO (mantido)
             codigo = str(random.randint(1000, 9999))
-           
+            
             print(f"--- MOCK WHATSAPP: Código de Ativação gerado para {celular}: {codigo} ---")
 
             # 4. Cria e Salva o Código de Ativação no DB (MANTIDO)
@@ -80,7 +80,7 @@ class UserService:
         except Exception as e:
             # Este bloco já foi corrigido para retornar o erro no Controller 400
             return {"error": f"Erro ao criar vendedor: {e}"}
-   
+    
     @staticmethod
     def activate_seller(celular, codigo):
         user = db.session.query(User).filter_by(celular=celular).first()
@@ -94,23 +94,24 @@ class UserService:
             return {"error": "Código inválido ou já usado."}
 
         activation.used = True
-        user.status = "ativo"
+        user.status = "ativo" # CORREÇÃO: Garante status em português
         db.session.commit()
 
         return {"message": "Usuário ativado com sucesso!"}
         
-  
+    
     @staticmethod
     def login_seller(email, password):
         user = UserService.authenticate_user(email, password)
         if not user:
             return {"error": "Credenciais inválidas."}
 
-        if user.status != "active":
+        # CORREÇÃO: Muda a verificação de status para "ativo" (em português)
+        if user.status != "ativo": 
             return {"error": "Usuário inativo. Ative primeiro."}
 
-       
-        token = create_access_token(identity=user.id)
+        # CORREÇÃO: Garante que o ID é passado como STRING para o JWT
+        token = create_access_token(identity=str(user.id))
         return {"token": token, "message": "Login realizado com sucesso!"}
     
     
@@ -122,21 +123,8 @@ class UserService:
             if activation:
                 db.session.delete(activation)
             
-           
+            
             db.session.delete(user)
             db.session.commit()
             return True
         return False
-
-
-
-
-
-    @staticmethod
-    def inactivate_user(user_id):
-        user = db.session.get(User, user_id)
-        if user:
-            user.status = "inactive"
-            db.session.commit()
-            return user
-        return None
