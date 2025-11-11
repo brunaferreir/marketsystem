@@ -10,15 +10,20 @@ class SaleService:
     def create_sale(seller_id, product_id, quantity):
         
         # 1. Busca simplificada do vendedor apenas pelo ID
-        # A verificação do status 'ativo' agora é feita no código Python
         seller = db.session.query(User).filter(
             User.id == seller_id
         ).first()
 
-        # Verifica se o vendedor existe e se está ATIVO (status 'ativo' em minúsculas)
-        if not seller or seller.status != "ativo": 
-            return {"error": "Vendedor inativo ou não encontrado"}, 400
+        # CRÍTICO: DIAGNÓSTICO DE ERRO DETALHADO (Este bloco é a chave!)
+        if not seller:
+            # Se não encontrou NADA no banco
+            return {"error": f"ERRO_DB: Vendedor {seller_id} não encontrado na tabela 'users'."}, 400
 
+        if seller.status != "ativo": 
+            # Se encontrou, mas o status está errado
+            return {"error": f"ERRO_DB: Vendedor encontrado (ID {seller_id}), mas status = '{seller.status}'."}, 400
+        # FIM DO DIAGNÓSTICO
+            
         # 2. Encontra o produto
         product = db.session.get(Product, product_id)
         if not product:
