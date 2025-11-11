@@ -94,7 +94,7 @@ class UserService:
             return {"error": "Código inválido ou já usado."}
 
         activation.used = True
-        user.status = "active"
+        user.status = "ativo"
         db.session.commit()
 
         return {"message": "Usuário ativado com sucesso!"}
