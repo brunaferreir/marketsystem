@@ -10,54 +10,52 @@ class SaleService:
     def create_sale(seller_id, product_id, quantity):
         
         # 1. Busca simplificada do vendedor apenas pelo ID
-        seller = db.session.query(User).filter(
-            User.id == seller_id
-        ).first()
+        # A verificação de status "ativo" foi removida para contornar o problema de DB no Railway
+        seller = db.session.get(User, seller_id)
 
-        # CRÍTICO: DIAGNÓSTICO DE ERRO DETALHADO (Este bloco é a chave!)
-        if not seller:
-            # Se não encontrou NADA no banco
-            return {"error": f"ERRO_DB: Vendedor {seller_id} não encontrado na tabela 'users'."}, 400
+        # 2. Verifica se o vendedor existe
+        if not seller: 
+            return {"error": "Vendedor não encontrado"}, 400
 
-        if seller.status != "ativo": 
-            # Se encontrou, mas o status está errado
-            return {"error": f"ERRO_DB: Vendedor encontrado (ID {seller_id}), mas status = '{seller.status}'."}, 400
-        # FIM DO DIAGNÓSTICO
-            
-        # 2. Encontra o produto
+        # 3. Encontra o produto
         product = db.session.get(Product, product_id)
         if not product:
             return {"error": "Produto não encontrado"}, 404
 
-        # 3. Validação de estoque
+        # 4. Validação de estoque
         if product.stock < quantity:
             return {"error": "Estoque insuficiente"}, 400
             
-        # 4. Cria a venda
-        sale_value = product.price * quantity
+        # 5. Cria a venda
+        try:
+            sale_value = product.price * quantity
+            
+            new_sale = Sale(
+                seller_id=seller_id, 
+                product_id=product_id, 
+                quantity=quantity, 
+                sale_value=sale_value,
+                sale_date=datetime.now()
+            )
+            
+            # 6. Atualiza o estoque
+            product.stock -= quantity
+            
+            db.session.add(new_sale)
+            db.session.commit()
+            
+            return {"message": "Venda registrada com sucesso!"}, 201
         
-        new_sale = Sale(
-            seller_id=seller_id, 
-            product_id=product_id, 
-            quantity=quantity, 
-            sale_value=sale_value,
-            sale_date=datetime.now()
-        )
-        
-        # 5. Atualiza o estoque
-        product.stock -= quantity
-        
-        db.session.add(new_sale)
-        db.session.commit()
-        
-        return {"message": "Venda registrada com sucesso!"}, 201
+        except Exception as e:
+            db.session.rollback()
+            return {"error": f"Erro ao registrar a venda: {str(e)}"}, 500
 
     @staticmethod
     def list_sales_by_seller(seller_id):
-        # 1. Verifica o vendedor
+        # Para a listagem, vamos IGNORAR o status também, pois o Railway está bloqueando.
         seller = db.session.get(User, seller_id)
-        if not seller or seller.status != "ativo":
-            return {"error": "Vendedor inativo ou não encontrado"}, 400
+        if not seller:
+            return {"error": "Vendedor não encontrado"}, 400
 
         # 2. Lista as vendas
         sales_query = db.session.query(Sale).filter(Sale.seller_id == seller_id).all()
