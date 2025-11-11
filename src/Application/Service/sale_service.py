@@ -1,49 +1,72 @@
-# Em src/Application/Service/sale_service.py
 from src.Infrastructure.Model.sale import Sale
 from src.Infrastructure.Model.user import User
 from src.Infrastructure.Model.product import Product
 from src.config.data_base import db
+from datetime import datetime
 
 class SaleService:
 
     @staticmethod
     def create_sale(seller_id, product_id, quantity):
         
-        # 1. Busca o seller. O status DEVE ser "ativo" (em português, minúsculo)
+        # 1. Busca simplificada do vendedor apenas pelo ID
+        # A verificação do status 'ativo' agora é feita no código Python
         seller = db.session.query(User).filter(
-            User.id == seller_id, 
-            User.status == "ativo" # <--- CORREÇÃO CRÍTICA AQUI: Mudado de "active" para "ativo"
+            User.id == seller_id
         ).first()
 
-        if not seller: 
-            # Este erro é retornado porque o status no BD não batia com o código
-            return {"error": "Vendedor inativo ou não encontrado"}, 400 
+        # Verifica se o vendedor existe e se está ATIVO (status 'ativo' em minúsculas)
+        if not seller or seller.status != "ativo": 
+            return {"error": "Vendedor inativo ou não encontrado"}, 400
 
-        # 2. verifica se o produto existe, está ativo e tem estoque
-        product = Product.query.filter_by(id=product_id, status="ativo").first() 
+        # 2. Encontra o produto
+        product = db.session.get(Product, product_id)
         if not product:
-            return {"error": "Produto inativo ou não encontrado"}, 400
+            return {"error": "Produto não encontrado"}, 404
+
+        # 3. Validação de estoque
+        if product.stock < quantity:
+            return {"error": "Estoque insuficiente"}, 400
+            
+        # 4. Cria a venda
+        sale_value = product.price * quantity
         
-        if product.quantity < quantity:
-            return {"error": "Estoque insuficiente para a venda"}, 400
-
-        # 3. registra venda
-        sale = Sale(
-            product_id=product.id,
-            seller_id=seller.id,
-            quantity_sold=quantity,
-            price_at_sale=product.price
+        new_sale = Sale(
+            seller_id=seller_id, 
+            product_id=product_id, 
+            quantity=quantity, 
+            sale_value=sale_value,
+            sale_date=datetime.now()
         )
-
-        # 4. atualiza estoque
-        product.quantity -= quantity
-
-        db.session.add(sale)
+        
+        # 5. Atualiza o estoque
+        product.stock -= quantity
+        
+        db.session.add(new_sale)
         db.session.commit()
-
-        return sale.to_dict(), 201
+        
+        return {"message": "Venda registrada com sucesso!"}, 201
 
     @staticmethod
     def list_sales_by_seller(seller_id):
-        sales = Sale.query.filter_by(seller_id=seller_id).all()
-        return [s.to_dict() for s in sales]
+        # 1. Verifica o vendedor
+        seller = db.session.get(User, seller_id)
+        if not seller or seller.status != "ativo":
+            return {"error": "Vendedor inativo ou não encontrado"}, 400
+
+        # 2. Lista as vendas
+        sales_query = db.session.query(Sale).filter(Sale.seller_id == seller_id).all()
+        
+        # Mapeia os resultados para um formato JSON limpo
+        sales_list = []
+        for sale in sales_query:
+            product = db.session.get(Product, sale.product_id)
+            sales_list.append({
+                "id": sale.id,
+                "product_name": product.name if product else "Produto Removido",
+                "quantity": sale.quantity,
+                "sale_value": sale.sale_value,
+                "sale_date": sale.sale_date.isoformat()
+            })
+            
+        return sales_list
