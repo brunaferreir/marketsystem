@@ -22,13 +22,15 @@ def create_app():
     app = Flask(__name__)
     app.url_map.strict_slashes = False
     
-  
+ 
+    # Configuração do CORS
     CORS(app, resources={r"/*": {"origins": "*", "allow_headers": ["Content-Type", "Authorization"]}})
 
-    app.config["JWT_SECRET_KEY"] = "obsidian"
-    jwt = JWTManager(app)
-
-    init_db(app)
+    # A CHAVE JWT FOI MOVIDA PARA init_db() no data_base.py
+    # app.config["JWT_SECRET_KEY"] = "obsidian" # <-- REMOVIDO!
+    
+    init_db(app) # <--- init_db agora define o JWT_SECRET_KEY
+    jwt = JWTManager(app) # <--- JWTManager DEPOIS de init_db para garantir que a chave esteja definida
 
     init_routes(app)
 

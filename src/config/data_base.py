@@ -1,4 +1,4 @@
-import os # 👈 IMPORTANTE: Precisamos do módulo 'os'
+import os 
 from flask_sqlalchemy import SQLAlchemy
 from flask_bcrypt import Bcrypt
 
@@ -8,8 +8,7 @@ bcrypt = Bcrypt()
 
 def init_db(app):
     """
-    Inicializa a base de dados lendo a DATABASE_URL do ambiente (Railway/Render).
-    Se a variável não for encontrada, usa a URL local como fallback.
+    Inicializa a base de dados e configura a chave JWT, priorizando variáveis de ambiente.
     """
     
     # 1. TENTA OBTER A URL DA VARIÁVEL DE AMBIENTE (RENDER/RAILWAY)
@@ -28,7 +27,7 @@ def init_db(app):
     app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
     
    
-    app.config['JWT_SECRET_KEY'] = os.environ.get("JWT_SECRET_KEY", "SUA_CHAVE_PADRAO_LOCAL")
+    app.config['JWT_SECRET_KEY'] = os.environ.get("JWT_SECRET_KEY", "obsidian") 
 
     db.init_app(app)
     bcrypt.init_app(app)
