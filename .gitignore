@@ -9,3 +9,6 @@ venv.bak/
 # Ignorar arquivos de cache do Python
 __pycache__/
 *.pyc
+
+__pycache__/
+*.pyc
