@@ -1,39 +1,39 @@
-# import os
-# from twilio.rest import Client
-
-# def enviar_codigo_whatsapp(telefone: str, codigo: str):
-    
-#     account_sid = os.getenv("TWILIO_ACCOUNT_SID")
-#     auth_token = os.getenv("TWILIO_AUTH_TOKEN")
-#     from_number = os.getenv("TWILIO_WHATSAPP_FROM", "whatsapp:+14155238886")
-
-#     client = Client(account_sid, auth_token)
-
-#     message = client.messages.create(
-#         from_=from_number,
-#         body=f"Seu código de ativação é: {codigo}",
-#         to=f"whatsapp:{telefone}"
-#     )
-
-#     print(f"[Twilio] Mensagem enviada para {telefone}, SID: {message.sid}")
-
 import os
-from dotenv import load_dotenv
+import random
 from twilio.rest import Client
 
-load_dotenv()  # Isso carrega as variáveis do arquivo .env
+class WhatsApp:
+    def __init__(self, account_sid, auth_token, from_number):
+        if not all([account_sid, auth_token, from_number]):
+            raise ValueError("As credenciais do Twilio (account_sid, auth_token, from_number) são necessárias.")
+        
+        self.client = Client(account_sid, auth_token)
+        self.from_number = from_number
 
-def enviar_codigo_whatsapp(telefone: str, codigo: str):
-    account_sid = os.getenv("TWILIO_ACCOUNT_SID")
-    auth_token = os.getenv("TWILIO_AUTH_TOKEN")
-    from_number = os.getenv("TWILIO_WHATSAPP_FROM", "whatsapp:+14155238886")
+    def send_message(self, to_number, text):
+        message = self.client.messages.create(
+            from_=self.from_number,
+            body=text,
+            to=to_number
+        )
+        print("Mensagem enviada! SID:", message.sid)
+        return message.sid
 
-    client = Client(account_sid, auth_token)
+    def send_code(self, to_number):
+        code = random.randint(1000, 9999)
+        text = f"Seu código de verificação é: {code}"
+        self.send_message(to_number, text)
+        return code
 
-    message = client.messages.create(
-        from_=from_number,
-        body=f"Seu código de ativação é: {codigo}",
-        to=f"whatsapp:{telefone}"
-    )
-
-    print(f"[Twilio] Mensagem enviada para {telefone}, SID: {message.sid}")
+if __name__ == "__main__":
+    # Para teste local, carregar as variáveis aqui
+    from dotenv import load_dotenv
+    load_dotenv()
+    
+    test_sid = os.getenv("TWILIO_ACCOUNT_SID")
+    test_token = os.getenv("TWILIO_AUTH_TOKEN")
+    test_from = os.getenv("FROM_NUMBER")
+    to_number = 'whatsapp:+5511999999999' # Substitua pelo seu número de teste
+    whatsapp = WhatsApp(test_sid, test_token, test_from)
+    codigo = whatsapp.send_code(to_number)
+    print("Código enviado:", codigo)

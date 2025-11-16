@@ -1,142 +1,93 @@
-from flask_jwt_extended import create_access_token
-from src.Domain.user import UserDomain
-from src.Infrastructure.Model.user import User
-from src.config.data_base import db, bcrypt
+from src.domain.user import UserDomain
+from src.infrastructure.model.user_model import User
+from src.config.data_base import db , bcrypt
+from src.infrastructure.http.whats_app import WhatsApp
+import os
 import random
-from src.Infrastructure.http.whats_app import enviar_codigo_whatsapp
-from src.Infrastructure.Model.activation_code import ActivationCode
 
 class UserService:
     @staticmethod
-    def create_user(name, cnpj, email, celular, password):
+    def create_user(name, email, password, cnpj, number):
+
         hashed_password = bcrypt.generate_password_hash(password).decode("utf-8")
-        new_user = UserDomain(
-            name=name,
-            cnpj=cnpj,
-            email=email,
-            celular=celular,
-            password=hashed_password, 
-            status="inactive"
-        )
+
+        new_user = UserDomain(name, email, hashed_password, cnpj, number)
         
-        user = User(
-            name=new_user.name, 
-            cnpj=new_user.cnpj, 
-            email=new_user.email,
-            celular=new_user.celular,
-            password=new_user.password,
-            status=new_user.status
-        )
+        whatsapp_number = f"whatsapp:{number}"
+
+        # Carrega as credenciais do ambiente e instancia o serviço
+        '''account_sid = os.getenv("TWILIO_ACCOUNT_SID")
+        auth_token = os.getenv("TWILIO_AUTH_TOKEN")
+        from_number = os.getenv("FROM_NUMBER")
+
+        whats_app_service = WhatsApp(account_sid, auth_token, from_number)
+        code = whats_app_service.send_code(to_number=whatsapp_number)'''
         
+        code = random.randint(1000, 9999)
+
+        user = User(name=new_user.name, email=new_user.email, password=new_user.password, cnpj=new_user.cnpj, number=new_user.number, code = code)
         db.session.add(user)
         db.session.commit()
         return user
 
     @staticmethod
-    def get_seller_by_id(user_id=None):
-        if user_id:
-            return db.session.get(User, user_id)
-        return None
-
-    @staticmethod
-    def update_user(user_id, data):
-        user = db.session.get(User, user_id)
-        if user:
-           
-            if 'password' in data:
-                data['password'] = bcrypt.generate_password_hash(data['password']).decode("utf-8")
-
-            for key, value in data.items():
-                setattr(user, key, value)
-            db.session.commit()
-            return user
-        return None
-
-    @staticmethod
-    def authenticate_user(email, password):
-        user = db.session.query(User).filter_by(email=email).first()
-        if user and bcrypt.check_password_hash(user.password, password):
-            return user
-        return None
+    def get_user(idUser):
+        user = User.query.get(idUser)
+        if not user:
+            return None
+        return user
 
     
     @staticmethod
-    def create_seller(name, cnpj, email, celular, password):
-        try:
-            # 1. Cria o Usuário (o status é 'inactive' por padrão)
-            user = UserService.create_user(name, cnpj, email, celular, password)
-            
-            # 2. GERA O CÓDIGO (mantido)
-            codigo = str(random.randint(1000, 9999))
-           
-            print(f"--- MOCK WHATSAPP: Código de Ativação gerado para {celular}: {codigo} ---")
-
-            # 4. Cria e Salva o Código de Ativação no DB (MANTIDO)
-            activation = ActivationCode(code=codigo, user_id=user.id)
-            db.session.add(activation)
-            db.session.commit()
-
-            return {"message": f"Usuário cadastrado. Código de ativação: {codigo} (MOCK)"}
-        except Exception as e:
-            # Este bloco já foi corrigido para retornar o erro no Controller 400
-            return {"error": f"Erro ao criar vendedor: {e}"}
-   
-    @staticmethod
-    def activate_seller(celular, codigo):
-        user = db.session.query(User).filter_by(celular=celular).first()
+    def update_user(idUser, new_data):
+        user = User.query.get(idUser)
         if not user:
-            return {"error": "Usuário não encontrado."}
+            return None
 
-        activation = db.session.query(ActivationCode).filter_by(
-            user_id=user.id, code=codigo, used=False
-        ).first()
-        if not activation:
-            return {"error": "Código inválido ou já usado."}
+        allowed_fields = ['name', 'email', 'password', 'cnpj', 'number']
 
-        activation.used = True
+        for field in allowed_fields:
+            if field in new_data and new_data[field] not in [None, ""]:
+                if field == "password":
+                    setattr(user, field, bcrypt.generate_password_hash(new_data[field]).decode("utf-8"))
+                else:
+                    setattr(user, field, new_data[field])
+
+        db.session.commit()
+        return user
+    
+    @staticmethod
+    def inativar_user(user_id):
+        user = User.query.get(user_id)
+        if not user:
+            return None
+        user.status = "inactive"
+        db.session.commit()
+        return user
+
+    @staticmethod
+    def ativar_user(number,code):
+        user = User.query.filter_by(number=number).first()
+        if not user:
+            return None, "Usuário não encontrado"
+
+        if user.code != code:
+            return None, "Código inválido"
+
         user.status = "active"
         db.session.commit()
+        return user , None  
 
-        return {"message": "Usuário ativado com sucesso!"}
-        
-  
     @staticmethod
-    def login_seller(email, password):
-        user = UserService.authenticate_user(email, password)
+    def autenticacao(email, password):
+        user = User.query.filter_by(email=email).first()
         if not user:
-            return {"error": "Credenciais inválidas."}
+            return None, "Usuário não encontrado"
+
+        if not bcrypt.check_password_hash(user.password, password):
+            return None, "Senha incorreta"
 
         if user.status != "active":
-            return {"error": "Usuário inativo. Ative primeiro."}
+            return None, "Usuário ainda não ativado"
 
-       
-        token = create_access_token(identity=user.id)
-        return {"token": token, "message": "Login realizado com sucesso!"}
-    
-    
-    @staticmethod
-    def delete_user(user_id):
-        user = db.session.get(User, user_id)
-        if user:
-            activation = db.session.query(ActivationCode).filter_by(user_id=user.id).first()
-            if activation:
-                db.session.delete(activation)
-            
-           
-            db.session.delete(user)
-            db.session.commit()
-            return True
-        return False
-
-
-
-
-
-    @staticmethod
-    def inactivate_user(user_id):
-        user = db.session.get(User, user_id)
-        if user:
-            user.status = "inactive"
-            db.session.commit()
-            return user
-        return None
+        return user, None

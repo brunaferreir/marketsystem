@@ -1,39 +1,59 @@
-# src/Application/Controllers/sale_controller.py
-from flask import Blueprint, request, jsonify
-from src.Application.Service.sale_service import SaleService
+from flask import request, jsonify, make_response
 from flask_jwt_extended import jwt_required, get_jwt_identity
+from src.application.service.sale_service import SaleService
 
-sale_bp = Blueprint("sale_bp", __name__, url_prefix="/api/sales")
+class SaleController:
+    @staticmethod
+    @jwt_required()
+    def create_sale():
+        try:
+            data = request.get_json()
+            if not data:
+                return make_response(jsonify({"erro": "Dados JSON são necessários"}), 400)
 
-@sale_bp.route("/", methods=["POST"])
-@jwt_required()
-def create_sale():
-    data = request.get_json()
-    seller_id_str = get_jwt_identity() # Pega o ID do token (ex: "2" como string)
-    
-    # *** CORREÇÃO: CONVERTE ID PARA INTEIRO (INT) ANTES DE USAR NA BUSCA ***
-    try:
-        seller_id = int(seller_id_str)
-    except ValueError:
-        # Se o token estiver corrompido, retorna erro 401
-        return jsonify({"error": "Token inválido ou corrompido"}), 401
-    
-    product_id = data.get("product_id")
-    quantity = data.get("quantity")
+            product_id = data.get("produtoId")
+            quantity = data.get("quantidade")
 
-    # Chama o serviço, passando o seller_id AGORA como inteiro (int)
-    response, status = SaleService.create_sale(seller_id, product_id, quantity)
-    return jsonify(response), status
+            if not product_id or not quantity:
+                return make_response(jsonify({
+                    "erro": "Os campos 'produtoId' e 'quantidade' são obrigatórios"
+                }), 400)
 
-@sale_bp.route("/", methods=["GET"])
-@jwt_required()
-def list_sales():
-    seller_id_str = get_jwt_identity()
-    
-    try:
-        seller_id = int(seller_id_str)
-    except ValueError:
-        return jsonify({"error": "Token inválido ou corrompido"}), 401
-    
-    sales = SaleService.list_sales_by_seller(seller_id)
-    return jsonify(sales), 200
+            try:
+                product_id = int(product_id)
+                quantity = int(quantity)
+            except ValueError:
+                return make_response(jsonify({
+                    "erro": "Os campos 'produtoId' e 'quantidade' devem ser números inteiros"
+                }), 400)
+
+            seller_id = get_jwt_identity()
+
+            sale, error, status_code = SaleService.register_sale(product_id, quantity, seller_id)
+            if error:
+                return make_response(jsonify({"erro": error}), status_code)
+
+            return make_response(jsonify({
+                "mensagem": "Venda realizada com sucesso",
+                "venda": sale.to_dict()
+            }), 201)
+
+        except Exception as e:
+            return make_response(jsonify({"erro": f"Erro interno: {str(e)}"}), 500)
+
+    @staticmethod
+    @jwt_required()
+    def get_sales():
+        try:
+            seller_id = get_jwt_identity()
+            sales = SaleService.get_sales(seller_id)
+
+            if not sales:
+                return make_response(jsonify({
+                    "mensagem": "Nenhuma venda encontrada para este vendedor."
+                }), 200)
+
+            return make_response(jsonify({"vendas": sales}), 200)
+
+        except Exception as e:
+            return make_response(jsonify({"erro": f"Erro interno: {str(e)}"}), 500)
